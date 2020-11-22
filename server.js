@@ -11,24 +11,24 @@ app.listen(port, () => {
   console.log(`server is listening on port:${port}`);
 });
 
+const sendResponses = (res, data, err) => {
+  if (err) {
+    res.json({ success: false, message: err });
+  } else if (!data) {
+    res.json({ success: false, message: 'Not Found' });
+  } else {
+    res.json({ success: true, data: data });
+  }
+};
+
 // CREATE
 app.post('/users', (req, res) => {
   // User.create()
   User.create(
     {
-      name: req.body.newData.name,
-      email: req.body.newData.email,
-      password: req.body.newData.password,
+      ...req.body.newData,
     },
-    (err, data) => {
-      if (err) {
-        res.json({ success: false, message: err });
-      } else if (!data) {
-        res.json({ success: false, message: 'Not Found' });
-      } else {
-        res.json({ success: true, data: data });
-      }
-    }
+    (err, data) => sendResponses(res, err, data)
   );
 });
 
@@ -37,15 +37,7 @@ app
   // READ
   .get((req, res) => {
     // User.findById()
-    User.findById(req.params.id, (err, data) => {
-      if (err) {
-        res.json({ success: false, message: err });
-      } else if (!data) {
-        res.json({ success: false, message: 'Not Found' });
-      } else {
-        res.json({ success: true, data: data });
-      }
-    });
+    User.findById(req.params.id, (err, data) => sendResponses(res, err, data));
   })
   // UPDATE
   .put((req, res) => {
@@ -53,43 +45,18 @@ app
     User.findByIdAndUpdate(
       req.params.id,
       {
-        name: req.body.newData.name,
-        email: req.body.newData.email,
-        password: req.body.newData.password,
+        ...req.body.newData,
       },
       {
         new: true,
       },
-      (data, err) => {
-        if (err) {
-          res.json({ success: false, message: err });
-        } else if (!data) {
-          res.json({ success: false, message: 'Not Found' });
-        } else {
-          res.json({ success: true, data: data });
-        }
-      }
+      (data, err) => sendResponses(res, err, data)
     );
   })
   // DELETE
   .delete((req, res) => {
     // User.findByIdAndDelete()
-    User.findByIdAndDelete(req.params.id, (err, data) => {
-      if (err) {
-        res.json({
-          success: false,
-          message: err,
-        });
-      } else if (!data) {
-        res.json({
-          success: false,
-          message: 'Not Found',
-        });
-      } else {
-        res.json({
-          success: true,
-          data: data,
-        });
-      }
-    });
+    User.findByIdAndDelete(req.params.id, (err, data) =>
+      sendResponses(res, err, data)
+    );
   });
